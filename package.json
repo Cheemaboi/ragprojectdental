@@ -6,15 +6,20 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed": "tsx scripts/seed-knowledge-base.ts",
+    "test:rag": "tsx scripts/test-rag.ts"
   },
   "dependencies": {
+    "@phosphor-icons/react": "^2.1.10",
     "@supabase/supabase-js": "^2.109.0",
+    "@types/ws": "^8.18.1",
     "motion": "^13.4.4",
     "next": "16.3.6",
     "openai": "^6.49.0",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "ws": "^8.22.0"
   },
   "devDependencies": {
     "@swc/helpers": "^0.5.23",
@@ -27,6 +32,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.6",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }
