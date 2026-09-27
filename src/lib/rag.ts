@@ -1,5 +1,6 @@
 import { createOpenRouterClient } from "@/lib/openrouter";
 import { createSupabaseServerClient } from "@/lib/supabase";
+import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
 const EMBEDDING_MODEL = "openai/text-embedding-3-small";
 const CHAT_MODEL = "openai/gpt-4.1-mini";
@@ -41,7 +42,7 @@ export async function retrieveDocuments(query: string): Promise<RetrievedDocumen
 
   if (error) throw new Error(`Retrieval failed: ${error.message}`);
 
-  return (data ?? []).map((item) => ({
+  return ((data ?? []) as Array<{ content: string; metadata: Record<string, string> | null; similarity: number }>).map((item) => ({
     content: item.content,
     metadata: (item.metadata ?? {}) as Record<string, string>,
     similarity: item.similarity,
@@ -69,7 +70,7 @@ export async function answerGroundedQuestion(message: string, history: ChatHisto
   };
 }
 
-function createGroundedMessages(message: string, history: ChatHistoryItem[], context: RetrievedDocument[]) {
+function createGroundedMessages(message: string, history: ChatHistoryItem[], context: RetrievedDocument[]): ChatCompletionMessageParam[] {
   const contextBlock = context
     .map((document, index) => `[Source ${index + 1}]\n${document.content}`)
     .join("\n\n");
@@ -81,7 +82,7 @@ function createGroundedMessages(message: string, history: ChatHistoryItem[], con
       },
       ...history.slice(-6).map((item) => ({ role: item.role, content: item.content })),
       { role: "user", content: `Clinic context:\n${contextBlock}\n\nPatient question: ${message}` },
-    ] as const;
+    ];
 }
 
 export async function streamGroundedAnswer(message: string, history: ChatHistoryItem[] = []) {
