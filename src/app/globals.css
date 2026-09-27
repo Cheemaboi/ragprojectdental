@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+:root {
+  --ui-background: #fafaf8;
+  --ui-surface: #f3f4f0;
+  --ui-surface-raised: #ffffff;
+  --ui-border: #d9ded9;
+  --ui-text-primary: #171b19;
+  --ui-text-muted: #65706a;
+  --ui-accent: #176b61;
+  --ui-accent-hover: #11564e;
+  --ui-success: #2d7a56;
+  --ui-error: #b44d45;
+  --radius-control: 0.75rem;
+  --radius-panel: 1.5rem;
+  --shadow-panel: 0 20px 48px rgb(23 27 25 / 0.12);
+  --shadow-float: 0 12px 28px rgb(23 27 25 / 0.14);
+}
+
+@theme inline {
+  --color-background: var(--ui-background);
+  --color-surface: var(--ui-surface);
+  --color-surface-raised: var(--ui-surface-raised);
+  --color-border: var(--ui-border);
+  --color-text-primary: var(--ui-text-primary);
+  --color-text-muted: var(--ui-text-muted);
+  --color-accent: var(--ui-accent);
+  --color-accent-hover: var(--ui-accent-hover);
+  --color-success: var(--ui-success);
+  --color-error: var(--ui-error);
+  --radius-control: var(--radius-control);
+  --radius-panel: var(--radius-panel);
+  --shadow-panel: var(--shadow-panel);
+  --shadow-float: var(--shadow-float);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-geist-mono);
+}
+
+* { border-color: var(--ui-border); }
+
+body {
+  min-height: 100dvh;
+  background: var(--ui-background);
+  color: var(--ui-text-primary);
+  font-family: var(--font-body), Arial, sans-serif;
+}
+
+::selection { background: color-mix(in srgb, var(--ui-accent) 20%, transparent); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
