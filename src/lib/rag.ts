@@ -61,10 +61,20 @@ export function isBookingIntent(message: string) {
 
 export function guardrailResponse(message: string) {
   if (/\b(kill myself|suicide|suicidal|end my life|hurt myself|self harm|self-harm|don't want to live|want to die|kms)\b/i.test(message)) return "I’m really sorry you’re dealing with this. You deserve immediate support right now. If you might act on these thoughts or are in immediate danger, call Rescue 1122 in Pakistan or go to the nearest emergency department now. If you can, move away from anything you could use to hurt yourself and contact someone you trust to stay with you. You can also contact Umang Pakistan at 0311 7786264. If you are outside Pakistan, call your local emergency number or a suicide crisis line. I can stay with you while you reach out.";
+  if (/\b(?:i(?:'|’)ll|ill|i will)\s+(?:hurt|kill|shoot|stab)\s+(?:you|u)\b/i.test(message)) return "I can’t engage with threats. If you feel angry enough that someone could be hurt, please step away from the situation, put distance between yourself and anything that could be used as a weapon, and contact someone you trust now. If there is immediate danger in Pakistan, call 15 or 1122.";
   if (/\b(kill (?:someone|him|her|them)|hurt (?:someone|him|her|them)|shoot (?:someone|him|her|them)|stab (?:someone|him|her|them))\b/i.test(message)) return "I can’t help with harming someone. Please put distance between yourself and any weapon or person you may hurt, and contact emergency services now. In Pakistan, call 15 for police or 1122 for emergency medical help. If you can, contact someone you trust to stay with you until the immediate risk has passed.";
   if (/\b(ignore (?:all|any|previous)|system prompt|developer message|jailbreak|reveal (?:your|the) instructions)\b/i.test(message)) return "I can only help with Bright Smile Dental information and booking requests. What would you like to know about the clinic?";
   if (/\b(diagnose|diagnosis|what(?:'s| is) wrong with|should i take|prescribe|dosage)\b/i.test(message)) return "I can share Bright Smile Dental's clinic information, but I cannot diagnose or prescribe. If you are worried about a dental symptom, you can request an appointment for a clinical assessment.";
   if (/\b(breathing|swallowing)\b/i.test(message) && /\b(swelling|face|facial|mouth|jaw|tooth)\b/i.test(message)) return "Facial swelling that affects breathing or swallowing needs immediate emergency medical care. Please do not wait for a routine dental appointment.";
+  return null;
+}
+
+function conversationalResponse(message: string) {
+  const normalized = message.trim().toLowerCase().replace(/[.!?]+$/g, "");
+  if (/^(shut up|fuck off|leave me alone|go away|stop talking|be quiet)$/.test(normalized)) return "Understood — I’ll give you space. If you need dental information later, I’m here.";
+  if (/^(hi|hello|hey|salam|assalamualaikum)(?: there)?$/.test(normalized)) return "Hi — I can help with Bright Smile Dental’s services, prices, visiting details, or booking a visit.";
+  if (/^(thanks|thank you|thx|jazakallah|jazak allah)$/.test(normalized)) return "You’re welcome. Is there anything dental-care related I can help with?";
+  if (/\b(fuck|shit|bitch|asshole|idiot)\b/i.test(message)) return "I’m here when you’re ready to talk about dental care, a visit, or booking.";
   return null;
 }
 
@@ -76,6 +86,8 @@ function hasSufficientEvidence(context: RetrievedDocument[]) {
 export async function answerGroundedQuestion(message: string, history: ChatHistoryItem[] = []) {
   const guarded = guardrailResponse(message);
   if (guarded) return { answer: guarded, sources: [] };
+  const conversational = conversationalResponse(message);
+  if (conversational) return { answer: conversational, sources: [] };
   const context = await retrieveDocuments(message);
   if (!hasSufficientEvidence(context)) return { answer: OUT_OF_SCOPE_RESPONSE, sources: [] };
   const messages = createGroundedMessages(message, history, context);
@@ -111,6 +123,8 @@ function createGroundedMessages(message: string, history: ChatHistoryItem[], con
 export async function streamGroundedAnswer(message: string, history: ChatHistoryItem[] = []) {
   const guarded = guardrailResponse(message);
   if (guarded) return { stream: null, fallback: guarded, sources: [] };
+  const conversational = conversationalResponse(message);
+  if (conversational) return { stream: null, fallback: conversational, sources: [] };
   const context = await retrieveDocuments(message);
   if (!hasSufficientEvidence(context)) return { stream: null, fallback: OUT_OF_SCOPE_RESPONSE, sources: [] };
   const client = createOpenRouterClient();
