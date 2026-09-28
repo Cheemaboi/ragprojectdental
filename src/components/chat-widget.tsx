@@ -108,7 +108,7 @@ export function ChatWidget() {
             animate={{ opacity: 1, y: 0, scale: 1, clipPath: "inset(0% 0% 0% 0% round 1.5rem)" }}
             exit={reduceMotion ? undefined : { opacity: 0, y: 16, scale: 0.88, clipPath: "inset(12% 4% 4% 18% round 1.5rem)" }}
             transition={{ duration: 0.46, ease: [0.16, 1, 0.3, 1] }}
-            className="relative mb-3 flex h-[min(33rem,calc(100dvh-8.5rem))] w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-panel border bg-surface-raised shadow-panel sm:h-[min(35rem,calc(100dvh-8rem))] sm:w-[25rem]"
+            className="fixed bottom-20 right-4 flex h-[31rem] max-h-[calc(100dvh-6rem)] w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-panel border bg-surface-raised shadow-panel sm:bottom-[5.5rem] sm:right-6 sm:h-[33rem] sm:max-h-[calc(100dvh-7rem)] sm:w-[25rem]"
           >
             <motion.div aria-hidden="true" initial={false} animate={reduceMotion ? {} : { x: [0, -10, 0], y: [0, 7, 0], scale: [1, 1.12, 1] }} transition={{ duration: 5.6, repeat: Infinity, ease: "easeInOut" }} className="pointer-events-none absolute -right-10 -top-12 size-36 rounded-full bg-mango/25 blur-3xl" />
             <header className="relative flex items-center justify-between border-b px-5 py-4">
