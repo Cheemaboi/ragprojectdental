@@ -103,20 +103,27 @@ export function ChatWidget() {
 
       <AnimatePresence>
         {isOpen && (
-          <motion.section initial={reduceMotion ? false : { opacity: 0, y: 18, scale: 0.92 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.96 }} transition={{ type: "spring", stiffness: 380, damping: 30, mass: 0.7 }} className="mb-3 flex h-[min(42rem,calc(100dvh-6rem))] w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-panel border bg-surface-raised shadow-panel sm:w-[25rem]">
-            <header className="flex items-center justify-between border-b px-5 py-4">
+          <motion.section
+            initial={reduceMotion ? false : { opacity: 0, y: 26, scale: 0.84, clipPath: "inset(18% 12% 10% 16% round 1.5rem)" }}
+            animate={{ opacity: 1, y: 0, scale: 1, clipPath: "inset(0% 0% 0% 0% round 1.5rem)" }}
+            exit={reduceMotion ? undefined : { opacity: 0, y: 16, scale: 0.88, clipPath: "inset(12% 4% 4% 18% round 1.5rem)" }}
+            transition={{ duration: 0.46, ease: [0.16, 1, 0.3, 1] }}
+            className="relative mb-3 flex h-[min(33rem,calc(100dvh-8.5rem))] w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-panel border bg-surface-raised shadow-panel sm:h-[min(35rem,calc(100dvh-8rem))] sm:w-[25rem]"
+          >
+            <motion.div aria-hidden="true" initial={false} animate={reduceMotion ? {} : { x: [0, -10, 0], y: [0, 7, 0], scale: [1, 1.12, 1] }} transition={{ duration: 5.6, repeat: Infinity, ease: "easeInOut" }} className="pointer-events-none absolute -right-10 -top-12 size-36 rounded-full bg-mango/25 blur-3xl" />
+            <header className="relative flex items-center justify-between border-b px-5 py-4">
               <div className="flex items-center gap-3">
                 <span className="grid size-9 place-items-center rounded-full bg-accent text-sm font-semibold text-white">B</span>
                 <div><p className="font-semibold tracking-[-0.02em]">Bright Smile Dental</p><p className="mt-0.5 flex items-center gap-1.5 text-xs text-text-muted"><span className="size-1.5 rounded-full bg-success" /> Online now</p></div>
               </div>
               <button onClick={() => setIsOpen(false)} className="grid size-10 place-items-center rounded-full text-text-muted transition duration-150 ease-out hover:bg-surface hover:text-text-primary active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" aria-label="Close assistant"><X size={20} weight="bold" /></button>
             </header>
-            <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-5">
+            <div ref={listRef} className="relative flex-1 space-y-3 overflow-y-auto px-4 py-4">
               {messages.map((message) => <MessageBubble key={message.id} message={message} />)}
               {bookingVisible && <BookingCard onSubmit={submitBooking} />}
               {isThinking && <TypingIndicator />}
             </div>
-            <form onSubmit={sendMessage} className="border-t bg-surface-raised p-3">
+            <form onSubmit={sendMessage} className="relative border-t bg-surface-raised p-3">
               <div className="flex items-end gap-2 rounded-control border bg-background px-3 py-2 focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/15">
                 <textarea value={input} onChange={(event) => setInput(event.target.value)} rows={1} maxLength={1000} placeholder="Ask about care or booking" className="max-h-24 min-h-6 flex-1 resize-none bg-transparent text-sm leading-6 outline-none placeholder:text-text-muted" />
                 <button disabled={!input.trim() || isThinking} className="grid size-9 place-items-center rounded-full bg-accent text-white transition duration-150 ease-out hover:bg-accent-hover active:scale-[0.94] disabled:cursor-not-allowed disabled:bg-border disabled:text-text-muted" aria-label="Send message"><PaperPlaneTilt size={17} weight="fill" /></button>
