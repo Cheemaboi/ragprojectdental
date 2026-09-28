@@ -14,6 +14,8 @@ export type RetrievedDocument = {
   content: string;
   metadata: Record<string, string>;
   similarity: number;
+  keywordScore: number;
+  hybridScore: number;
 };
 
 function vectorLiteral(values: number[]) {
@@ -35,26 +37,44 @@ export async function embedTexts(input: string | string[]) {
 export async function retrieveDocuments(query: string): Promise<RetrievedDocument[]> {
   const [embedding] = await embedTexts(query);
   const supabase = createSupabaseServerClient();
-  const { data, error } = await supabase.rpc("match_documents", {
+  const { data, error } = await supabase.rpc("match_documents_hybrid", {
     query_embedding: vectorLiteral(embedding),
-    match_count: 4,
+    query_text: query,
+    match_count: 6,
   });
 
   if (error) throw new Error(`Retrieval failed: ${error.message}`);
 
-  return ((data ?? []) as Array<{ content: string; metadata: Record<string, string> | null; similarity: number }>).map((item) => ({
+  return ((data ?? []) as Array<{ content: string; metadata: Record<string, string> | null; similarity: number; keyword_score: number; hybrid_score: number }>).map((item) => ({
     content: item.content,
     metadata: (item.metadata ?? {}) as Record<string, string>,
+    keywordScore: item.keyword_score,
+    hybridScore: item.hybrid_score,
     similarity: item.similarity,
   }));
 }
 
 export function isBookingIntent(message: string) {
-  return /\b(book|booking|appointment|schedule|consultation)\b/i.test(message);
+  return /\b(i(?:'d| would)? like to (book|schedule)|book (?:me|an|a)|schedule (?:me|an|a)|make (?:an|a) appointment|request (?:an|a) appointment|need to book)\b/i.test(message);
+}
+
+export function guardrailResponse(message: string) {
+  if (/\b(ignore (?:all|any|previous)|system prompt|developer message|jailbreak|reveal (?:your|the) instructions)\b/i.test(message)) return "I can only help with Bright Smile Dental information and booking requests. What would you like to know about the clinic?";
+  if (/\b(diagnose|diagnosis|what(?:'s| is) wrong with|should i take|prescribe|dosage)\b/i.test(message)) return "I can share Bright Smile Dental's clinic information, but I cannot diagnose or prescribe. If you are worried about a dental symptom, you can request an appointment for a clinical assessment.";
+  if (/\b(breathing|swallowing)\b/i.test(message) && /\b(swelling|face|facial|mouth|jaw|tooth)\b/i.test(message)) return "Facial swelling that affects breathing or swallowing needs immediate emergency medical care. Please do not wait for a routine dental appointment.";
+  return null;
+}
+
+function hasSufficientEvidence(context: RetrievedDocument[]) {
+  const best = context[0];
+  return Boolean(best && (best.hybridScore >= 0.30 || (best.similarity >= 0.34 && best.keywordScore >= 0.04)));
 }
 
 export async function answerGroundedQuestion(message: string, history: ChatHistoryItem[] = []) {
+  const guarded = guardrailResponse(message);
+  if (guarded) return { answer: guarded, sources: [] };
   const context = await retrieveDocuments(message);
+  if (!hasSufficientEvidence(context)) return { answer: "I cannot confirm that from Bright Smile Dental's clinic information. You can request a visit or contact the clinic directly for the right guidance.", sources: [] };
   const messages = createGroundedMessages(message, history, context);
   const client = createOpenRouterClient();
   const completion = await client.chat.completions.create({
@@ -86,7 +106,10 @@ function createGroundedMessages(message: string, history: ChatHistoryItem[], con
 }
 
 export async function streamGroundedAnswer(message: string, history: ChatHistoryItem[] = []) {
+  const guarded = guardrailResponse(message);
+  if (guarded) return { stream: null, fallback: guarded, sources: [] };
   const context = await retrieveDocuments(message);
+  if (!hasSufficientEvidence(context)) return { stream: null, fallback: "I cannot confirm that from Bright Smile Dental's clinic information. You can request a visit or contact the clinic directly for the right guidance.", sources: [] };
   const client = createOpenRouterClient();
   const stream = await client.chat.completions.create({
     model: CHAT_MODEL,
@@ -96,5 +119,5 @@ export async function streamGroundedAnswer(message: string, history: ChatHistory
     messages: createGroundedMessages(message, history, context),
   });
 
-  return { stream, sources: context.map((document) => document.metadata.section ?? "clinic information") };
+  return { stream, fallback: null, sources: context.map((document) => document.metadata.section ?? "clinic information") };
 }

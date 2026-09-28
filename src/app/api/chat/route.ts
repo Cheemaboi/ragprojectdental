@@ -23,8 +23,9 @@ export async function POST(request: Request) {
       return Response.json({ action: "booking", message: "I can help you request a visit. Please share a few details below and our team will confirm availability." });
     }
 
-    const { stream, sources } = await streamGroundedAnswer(message, validHistory(body.history));
+    const { stream, fallback, sources } = await streamGroundedAnswer(message, validHistory(body.history));
     const encoder = new TextEncoder();
+    if (!stream) return new Response(fallback ?? "Please contact Bright Smile Dental directly.", { headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" } });
     const responseStream = new ReadableStream({
       async start(controller) {
         try {
