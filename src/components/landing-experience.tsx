@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import {
   AnimatePresence,
   motion,
@@ -42,7 +43,7 @@ const notes = [
 ];
 
 function Brand() {
-  return <span className="flex items-center gap-3"><span className="brand-orb"><b>B</b><i /></span><span className="font-display text-[1.02rem] font-semibold tracking-[-0.065em]">Bright Smile<span className="ml-1 text-mint">Dental</span></span></span>;
+  return <span className="flex items-center gap-3"><span className="brand-orb"><Tooth size={22} weight="duotone" /><i /></span><span><span className="block font-display text-[1.02rem] font-semibold leading-none tracking-[-0.065em]">Bright Smile<span className="ml-1 text-mint">Dental</span></span><span className="mt-1 block text-[0.49rem] font-bold tracking-[0.16em] text-paper/55">CARE THAT FOLLOWS THROUGH</span></span></span>;
 }
 
 function OpenAssistantButton({ className = "" }: { className?: string }) {
@@ -73,6 +74,7 @@ export function LandingExperience() {
 
       <section id="top" className="relative min-h-[100dvh] bg-pine pt-24 text-paper">
         <div className="hero-atmosphere absolute inset-0" />
+        <motion.div aria-hidden="true" animate={reduceMotion ? {} : { rotate: 360, scale: [1, 1.05, 1] }} transition={{ rotate: { duration: 32, repeat: Infinity, ease: "linear" }, scale: { duration: 8, repeat: Infinity, ease: "easeInOut" } }} className="hero-orbit absolute -right-[24rem] top-[2%] size-[58rem]" />
         <div className="relative mx-auto grid min-h-[calc(100dvh-6rem)] max-w-[1540px] grid-cols-1 items-center gap-8 px-5 pb-10 md:px-10 lg:grid-cols-12 lg:gap-4">
           <motion.div style={{ y: heroY }} className="relative z-10 pt-10 lg:col-span-7 lg:pt-0">
             <motion.p initial={reduceMotion ? false : { opacity: 0, x: -18 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.65, delay: 0.12, ease }} className="hero-kicker"><span className="pulse-dot" /> DENTAL CARE, MADE CALMER</motion.p>
@@ -119,7 +121,7 @@ export function LandingExperience() {
 }
 
 function Header({ solid }: { solid: boolean }) {
-  return <motion.header animate={{ backgroundColor: solid ? "rgba(17,44,39,.94)" : "rgba(17,44,39,0)", boxShadow: solid ? "0 10px 30px rgba(0,0,0,.12)" : "0 0px 0px rgba(0,0,0,0)" }} transition={{ duration: 0.35, ease }} className="fixed inset-x-0 top-0 z-[60] border-b border-paper/0 backdrop-blur-md"><nav className="mx-auto flex max-w-[1540px] items-center justify-between px-5 py-5 text-paper md:px-10"><a href="#top" aria-label="Bright Smile Dental home"><Brand /></a><div className="hidden items-center gap-8 text-sm font-semibold text-paper/75 md:flex"><a className="nav-link" href="#care">Care</a><a className="nav-link" href="#team">Our team</a><a className="nav-link" href="#visit">Visit</a></div><a href="#booking" className="header-cta">Request a visit <ArrowUpRight size={15} /></a></nav></motion.header>;
+  return <motion.header animate={{ backgroundColor: solid ? "rgba(17,44,39,.94)" : "rgba(17,44,39,0)", boxShadow: solid ? "0 10px 30px rgba(0,0,0,.12)" : "0 0px 0px rgba(0,0,0,0)" }} transition={{ duration: 0.35, ease }} className="fixed inset-x-0 top-0 z-[60] border-b border-paper/0 backdrop-blur-md"><nav className="mx-auto flex max-w-[1540px] items-center justify-between px-5 py-5 text-paper md:px-10"><Link href="/#top" aria-label="Bright Smile Dental home"><Brand /></Link><div className="hidden items-center gap-8 text-sm font-semibold text-paper/75 md:flex"><Link className="nav-link" href="/care">Care</Link><Link className="nav-link" href="/team">Our team</Link><Link className="nav-link" href="/visit">Visit</Link></div><Link href="/visit#booking" className="header-cta">Request a visit <ArrowUpRight size={15} /></Link></nav></motion.header>;
 }
 
 function Word({ children, delay, className = "" }: { children: React.ReactNode; delay: number; className?: string }) {
