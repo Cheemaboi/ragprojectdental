@@ -70,11 +70,24 @@ export function guardrailResponse(message: string) {
 }
 
 function conversationalResponse(message: string) {
-  const normalized = message.trim().toLowerCase().replace(/[.!?]+$/g, "");
-  if (/^(shut up|fuck off|leave me alone|go away|stop talking|be quiet)$/.test(normalized)) return "Understood — I’ll give you space. If you need dental information later, I’m here.";
-  if (/^(hi|hello|hey|salam|assalamualaikum)(?: there)?$/.test(normalized)) return "Hi — I can help with Bright Smile Dental’s services, prices, visiting details, or booking a visit.";
+  const normalized = message
+    .normalize("NFKC")
+    .trim()
+    .toLowerCase()
+    .replace(/[.!?,;:]+$/g, "")
+    .replace(/\s+/g, " ");
+  const words = normalized.split(" ").filter(Boolean);
+  const isQuestion = /\?|^(what|when|where|why|how|can|could|would|should|do|does|is|are|will|may)\b/.test(normalized);
+  const hasDentalSignal = /\b(dent(?:al|ist|istry)?|tooth|teeth|gum|gums|braces?|aligner|whiten(?:ing)?|filling|cavity|cavities|pain|ache|appointment|book(?:ing)?|visit|price|cost|hours?|clinic|doctor|x-?ray|scal(?:ing|e)|polish(?:ing)?|extraction|emergency)\b/.test(normalized);
+
+  if (/^(shut up|fuck off|leave me alone|go away|stop(?: talking)?|be quiet|quiet|be silent|silence|dont talk|don't talk|no more)$/.test(normalized)) return "Okay — I’ll stay quiet. I’m here whenever you need dental help.";
+  if (/^(good ?night|night|bye|goodbye|see you|cya|later)$/.test(normalized)) return "Goodnight. Take care — I’ll be here whenever you need dental help.";
+  if (/^(good ?morning|good ?afternoon|good ?evening)$/.test(normalized)) return "Good morning — how can I help with your dental care today?";
+  if (/^(sup|what'?s up|whats up|yo|hiya|howdy|heya|h+e+y+|hi+|hello+|salam|assalamualaikum)(?: there)?$/.test(normalized)) return "Hi — I can help with Bright Smile Dental’s services, prices, visiting details, or booking a visit.";
   if (/^(thanks|thank you|thx|jazakallah|jazak allah)$/.test(normalized)) return "You’re welcome. Is there anything dental-care related I can help with?";
   if (/\b(fuck|shit|bitch|asshole|idiot)\b/i.test(message)) return "I’m here when you’re ready to talk about dental care, a visit, or booking.";
+  if (/\b(this (?:is|bot is)|you(?:'re| are)) (?:bad|useless|terrible|annoying|stupid)\b/.test(normalized)) return "I’m sorry this has been frustrating. I’ll keep it simple: I’m here for dental information or booking when you need it.";
+  if (words.length <= 4 && !isQuestion && !hasDentalSignal) return "I’m here whenever you need help with dental care or booking.";
   return null;
 }
 
